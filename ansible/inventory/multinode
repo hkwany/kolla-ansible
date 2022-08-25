@@ -2,9 +2,8 @@
 # additional groups are for more control of the environment.
 [control]
 # These hostname must be resolvable from your deployment host
-control01
-control02
-control03
+ct1	ansible_connection=ssh	ansible_user=ncl	become=true	ansible_password=deterinavm	ansible_become_password=deterinavm
+ct2	ansible_connection=ssh	ansible_user=ncl	become=true	ansible_password=deterinavm	ansible_become_password=deterinavm
 
 # The above can also be specified as follows:
 #control[01:03]     ansible_user=kolla
@@ -12,14 +11,13 @@ control03
 # The network nodes are where your l3-agent and loadbalancers will run
 # This can be the same as a host in the control group
 [network]
-network01
-network02
+ct1	ansible_connection=ssh	ansible_user=ncl	become=true	ansible_password=deterinavm	ansible_become_password=deterinavm
+ct2	ansible_connection=ssh	ansible_user=ncl	become=true	ansible_password=deterinavm	ansible_become_password=deterinavm
 
 [compute]
-compute01
+cp1	ansible_connection=ssh	ansible_user=ncl	become=true	ansible_password=deterinavm	ansible_become_password=deterinavm
 
 [monitoring]
-monitoring01
 
 # When compute nodes and control nodes use different interfaces,
 # you need to comment out "api_interface" and other interfaces from the globals.yml
@@ -27,10 +25,9 @@ monitoring01
 #compute01 neutron_external_interface=eth0 api_interface=em1 storage_interface=em1 tunnel_interface=em1
 
 [storage]
-storage01
 
 [deployment]
-localhost       ansible_connection=local
+localhost       ansible_connection=local	ansible_become_password=deterinavm
 
 [baremetal:children]
 control
@@ -46,16 +43,6 @@ control
 # groups in the sections below. Common services are grouped together.
 
 [common:children]
-control
-network
-compute
-storage
-monitoring
-
-[chrony-server:children]
-haproxy
-
-[chrony:children]
 control
 network
 compute
@@ -80,9 +67,6 @@ monitoring
 [kafka:children]
 control
 
-[karbor:children]
-control
-
 [kibana:children]
 control
 
@@ -96,7 +80,13 @@ storage
 [elasticsearch:children]
 control
 
-[haproxy:children]
+[hacluster:children]
+control
+
+[hacluster-remote:children]
+compute
+
+[loadbalancer:children]
 network
 
 [mariadb:children]
@@ -177,9 +167,6 @@ control
 [magnum:children]
 control
 
-[qinling:children]
-control
-
 [sahara:children]
 control
 
@@ -199,9 +186,6 @@ control
 control
 compute
 
-[panko:children]
-control
-
 [gnocchi:children]
 control
 
@@ -209,10 +193,6 @@ control
 control
 
 [trove:children]
-control
-
-# Tempest
-[tempest:children]
 control
 
 [senlin:children]
@@ -225,12 +205,6 @@ control
 control
 
 [watcher:children]
-control
-
-[rally:children]
-control
-
-[searchlight:children]
 control
 
 [octavia:children]
@@ -328,7 +302,6 @@ neutron
 
 [neutron-ovn-metadata-agent:children]
 compute
-network
 
 [neutron-bgp-dragent:children]
 neutron
@@ -377,16 +350,6 @@ ironic
 
 [tgtd:children]
 storage
-
-# Karbor
-[karbor-api:children]
-karbor
-
-[karbor-protection:children]
-karbor
-
-[karbor-operationengine:children]
-karbor
 
 # Manila
 [manila-api:children]
@@ -457,9 +420,6 @@ monasca
 [monasca-grafana:children]
 monasca
 
-[monasca-log-transformer:children]
-monasca
-
 [monasca-log-persister:children]
 monasca
 
@@ -504,13 +464,6 @@ magnum
 
 [magnum-conductor:children]
 magnum
-
-# Qinling
-[qinling-api:children]
-qinling
-
-[qinling-engine:children]
-qinling
 
 # Sahara
 [sahara-api:children]
@@ -587,10 +540,6 @@ compute
 [cyborg-conductor:children]
 cyborg
 
-# Panko
-[panko-api:children]
-panko
-
 # Gnocchi
 [gnocchi-api:children]
 gnocchi
@@ -638,13 +587,6 @@ senlin
 
 [senlin-health-manager:children]
 senlin
-
-# Searchlight
-[searchlight-api:children]
-searchlight
-
-[searchlight-listener:children]
-searchlight
 
 # Octavia
 [octavia-api:children]
@@ -751,7 +693,7 @@ storage
 mariadb
 
 [prometheus-haproxy-exporter:children]
-haproxy
+loadbalancer
 
 [prometheus-memcached-exporter:children]
 memcached
@@ -781,7 +723,10 @@ control
 [masakari-engine:children]
 control
 
-[masakari-monitors:children]
+[masakari-hostmonitor:children]
+control
+
+[masakari-instancemonitor:children]
 compute
 
 [ovn-controller:children]
